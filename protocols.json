@@ -1,0 +1,19 @@
+{
+    "type":["connection","message","login","changegroup"],
+    "connection":{
+        "client":{"type":"connection"},
+        "server":{"type":"connection","id":"int"}
+    },
+    "login":{
+        "client":{"type":"login","username":"str","password":"str","id":"int"},
+        "server":{"type":"login","return":"bool"}
+    },
+    "message":{
+        "client":{"id":"int","type":"message","message":"str","username":"str","senttime":"timemilli","groupid":"int"},
+        "server":{"type":"message","msgid":"int","message":"str","senttime":"timemilli","groupid":"int","senderusername":"str"}
+    },
+    "changegroup":{
+        "client":{"id":"int","type":"changegroup","groupid":"int"},
+        "server":{"type":"changegroup","return":"bool","groupid":"groupid"}
+    }
+}   
