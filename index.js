@@ -12,6 +12,16 @@ const sendall = (data) => {
 }
 
 
+const eventTypes = {
+  CONNECTION: "connection",
+  LOGIN: "login",
+  REGISTER: "register",
+  MESSAGE: "message",
+  CHANGEGROUP: "changegroup"
+
+}
+
+
 let lastuserid = 0;
 let lastmsgid = 0
 
@@ -23,29 +33,35 @@ fastify.get('/', { websocket: true }, (connection /* SocketStream */, req /* Fas
  
     const data = strObj(message.toString())
     switch (data.type) {
-      case "connection":
-        connection.socket.send(objStr({type:"connection",id:lastuserid+1}))
+      case eventTypes.CONNECTION:
+        connection.socket.send(objStr({type:eventTypes.CONNECTION,id:lastuserid+1}))
         lastuserid++;
         
         break
-      case "login":
+      case eventTypes.LOGIN:
         if (getuser(data.username,data.password)){
           sendall(objStr({
-            type:"message",
+            type:eventTypes.MESSAGE,
             msgid:lastmsgid,
             message:`${data.username} Joined The Server`,
             senderusername:"Server",
             senttime:Date.now(),
             groupid:"0000",
           }))
-          connection.socket.send(objStr({type:"login",return:true}))
+          connection.socket.send(objStr({type:eventTypes.LOGIN,return:true}))
+        }else {
+          connection.socket.send(objStr({type:eventTypes.LOGIN,return:false}))
         }
         break
-      case "register":
-        if(getuser(data.username,data.password)){return}
+      case eventTypes.REGISTER:
+        if(getuser(data.username,data.password)){
+          connection.socket.send(objStr({type:eventTypes.LOGIN,return:false}))
+          return
+        }
+        
         newuser(data.username,data.password)
         sendall(objStr({
-          type:"message",
+          type:eventTypes.MESSAGE,
           msgid:lastmsgid,
           message:`${data.username} Joined The Server`,
           senderusername:"Server",
@@ -53,12 +69,12 @@ fastify.get('/', { websocket: true }, (connection /* SocketStream */, req /* Fas
           groupid:"0000",
       }))
 
-      connection.socket.send(objStr({type:"login",return:true}))
-      case "message":
+      connection.socket.send(objStr({type:eventTypes.LOGIN,return:true}))
+      case eventTypes.MESSAGE:
         lastmsgid++;
         sendall(objStr(
           {
-            type:"message",
+            type:eventTypes.MESSAGE,
             msgid:lastmsgid,
             message:data.message,
             senderusername:data.username,
@@ -67,16 +83,16 @@ fastify.get('/', { websocket: true }, (connection /* SocketStream */, req /* Fas
         }
           ))
         break;
-      case "changegroup":
+      case eventTypes.CHANGEGROUP:
         connection.socket.send(objStr({ 
-          type:"changegroup",
+          type:eventTypes.CHANGEGROUP,
           return:true,
           groupid:data.groupid,
         }))
         lastmsgid++;
 
         sendall(objStr({
-            type:"message",
+            type:eventTypes.MESSAGE,
             msgid:lastmsgid,
             message:`${data.username} Joined The Chat`,
             senderusername:"Server",
