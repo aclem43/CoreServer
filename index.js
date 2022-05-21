@@ -1,5 +1,6 @@
 const {objStr,strObj} = require('./modules/utils')
 const {getuser,initusers, newuser} = require('./modules/user')
+const config = require("./config.json")
 const fastify = require('fastify')()
 fastify.register(require('fastify-websocket'))
 
@@ -112,8 +113,10 @@ fastify.get('/', { websocket: true }, (connection /* SocketStream */, req /* Fas
   //})
 })
 
-console.log("Starting")
-fastify.listen(8080, err => {
+
+
+console.log("Starting on port " + config.port)
+fastify.listen(config.port, err => {
   if (err) {
     fastify.log.error(err)
     console.log(err)
