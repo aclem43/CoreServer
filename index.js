@@ -114,7 +114,7 @@ fastify.get('/', { websocket: true }, (connection /* SocketStream */, req /* Fas
 })
 
 
-
+console.log("Version - " + config.version)
 console.log("Starting on port " + config.port)
 fastify.listen(config.port, err => {
   if (err) {
