@@ -1,4 +1,10 @@
 {
     "port":42069,
-    "version":"0.1"
+    "version":"0.2",
+    "unavalibleusernames":[
+        "dev",
+        "server",
+        "serverdev",
+        "devserver"
+    ]
 }

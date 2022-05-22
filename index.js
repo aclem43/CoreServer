@@ -55,22 +55,20 @@ fastify.get('/', { websocket: true }, (connection /* SocketStream */, req /* Fas
         }
         break
       case eventTypes.REGISTER:
-        if(getuser(data.username,data.password)){
-          connection.socket.send(objStr({type:eventTypes.LOGIN,return:false}))
-          return
+        if (newuser(data.username,data.password)){
+          sendall(objStr({
+            type:eventTypes.MESSAGE,
+            msgid:lastmsgid,
+            message:`${data.username} Joined The Server`,
+            senderusername:"Server",
+            senttime:Date.now(),
+            groupid:"0000",
+           }))
+         connection.socket.send(objStr({type:eventTypes.LOGIN,return:true}))
         }
-        
-        newuser(data.username,data.password)
-        sendall(objStr({
-          type:eventTypes.MESSAGE,
-          msgid:lastmsgid,
-          message:`${data.username} Joined The Server`,
-          senderusername:"Server",
-          senttime:Date.now(),
-          groupid:"0000",
-      }))
-
-      connection.socket.send(objStr({type:eventTypes.LOGIN,return:true}))
+        else{
+          connection.socket.send(objStr({type:eventTypes.LOGIN,return:false}))
+        }
       case eventTypes.MESSAGE:
         lastmsgid++;
         sendall(objStr(

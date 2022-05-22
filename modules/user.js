@@ -1,5 +1,6 @@
 const fs = require('fs');
 const { strObj, objStr } = require('./utils');
+const config = require("../config.json")
 let file = null;
 let users = null;
 
@@ -27,8 +28,29 @@ const save = () => {
 exports.initusers = () => checkfile()
 
 exports.newuser = (username,password) => {
-    users.users.push({username:username,password:password})
-    save()
+    if (checkUsername(username)){
+        return false
+    }
+    else{
+        users.users.push({username:username,password:password})
+        save()
+    }
+    return true
+}
+
+const checkUsername = (username) => {
+    let returndata = false;
+    users.users.forEach((user)=>{
+        if (user.username == username) {
+            returndata = true
+        }
+    })
+    if (!returndata){
+        if (username in config.unavalibleusernames){
+            returndata = true;
+        }
+    }
+    return returndata
 }
 
 exports.getuser = (username,password) => {
