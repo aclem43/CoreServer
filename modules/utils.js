@@ -5,3 +5,12 @@ exports.objStr = (object) => {
 exports.strObj = (string) => {
     return JSON.parse(string)
 }
+
+exports.eventTypes = {
+  CONNECTION: "connection",
+  LOGIN: "login",
+  REGISTER: "register",
+  MESSAGE: "message",
+  CHANGEGROUP: "changegroup"
+
+}

@@ -1,25 +1,16 @@
-const {objStr,strObj} = require('./modules/utils')
+const {objStr,strObj,eventTypes} = require('./modules/utils')
 const {getuser,initusers, newuser} = require('./modules/user')
 const config = require("./config.json")
+const { messages } = require('./modules/servermessages')
 const fastify = require('fastify')()
 fastify.register(require('fastify-websocket'))
 
 const sendall = (data) => {
   fastify.websocketServer.clients.forEach(function each(client) {
     if (client.readyState === 1) {
-      client.send(data)
+      client.send(objStr(data))
     }
 })
-}
-
-
-const eventTypes = {
-  CONNECTION: "connection",
-  LOGIN: "login",
-  REGISTER: "register",
-  MESSAGE: "message",
-  CHANGEGROUP: "changegroup"
-
 }
 
 
@@ -28,8 +19,8 @@ let lastmsgid = 0
 
 initusers()
 
-fastify.get('/', { websocket: true }, (connection /* SocketStream */, req /* FastifyRequest */) => {
-  connection.socket.on('message', message => {
+fastify.get('/', { websocket: true },async(connection /* SocketStream */, req /* FastifyRequest */) => {
+  connection.socket.on('message', async(message) => {
     //  message.toString() === 'hi from client'
  
     const data = strObj(message.toString())
@@ -40,38 +31,29 @@ fastify.get('/', { websocket: true }, (connection /* SocketStream */, req /* Fas
         
         break
       case eventTypes.LOGIN:
-        if (getuser(data.username,data.password)){
-          sendall(objStr({
-            type:eventTypes.MESSAGE,
-            msgid:lastmsgid,
-            message:`${data.username} Joined The Server`,
-            senderusername:"Server",
-            senttime:Date.now(),
-            groupid:"0000",
-          }))
+        const user = await getuser(data.username,data.password)
+        if (user){
+          lastmsgid++;
           connection.socket.send(objStr({type:eventTypes.LOGIN,return:true}))
+          lastmsgid++;
+          messages.join(fastify.websocketServer,data.username,lastmsgid)
         }else {
           connection.socket.send(objStr({type:eventTypes.LOGIN,return:false}))
         }
         break
       case eventTypes.REGISTER:
         if (newuser(data.username,data.password)){
-          sendall(objStr({
-            type:eventTypes.MESSAGE,
-            msgid:lastmsgid,
-            message:`${data.username} Joined The Server`,
-            senderusername:"Server",
-            senttime:Date.now(),
-            groupid:"0000",
-           }))
-         connection.socket.send(objStr({type:eventTypes.LOGIN,return:true}))
+          lastmsgid++;
+          connection.socket.send(objStr({type:eventTypes.LOGIN,return:true}))
+          lastmsgid++;
+          messages.join(fastify.websocketServer,data.username,lastmsgid)        
         }
         else{
           connection.socket.send(objStr({type:eventTypes.LOGIN,return:false}))
         }
       case eventTypes.MESSAGE:
         lastmsgid++;
-        sendall(objStr(
+        sendall(
           {
             type:eventTypes.MESSAGE,
             msgid:lastmsgid,
@@ -80,7 +62,7 @@ fastify.get('/', { websocket: true }, (connection /* SocketStream */, req /* Fas
             senttime:data.senttime,
             groupid:data.groupid,
         }
-          ))
+          )
         break;
       case eventTypes.CHANGEGROUP:
         connection.socket.send(objStr({ 
@@ -90,14 +72,14 @@ fastify.get('/', { websocket: true }, (connection /* SocketStream */, req /* Fas
         }))
         lastmsgid++;
 
-        sendall(objStr({
+        sendall({
             type:eventTypes.MESSAGE,
             msgid:lastmsgid,
             message:`${data.username} Joined The Chat`,
             senderusername:"Server",
             senttime:Date.now(),
             groupid:data.groupid,
-        }))
+        })
 
         
         break

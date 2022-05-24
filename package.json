@@ -6,7 +6,9 @@
   },
   "dependencies": {
     "fastify": "^3.27.4",
-    "fastify-websocket": "^4.2.0"
+    "fastify-websocket": "^4.2.0",
+    "mongodb": "^4.6.0",
+    "mysql2": "^2.3.3"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"

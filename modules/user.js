@@ -1,50 +1,51 @@
 const fs = require('fs');
 const { strObj, objStr } = require('./utils');
-const config = require("../config.json")
+const config = require("../config.json");
+const { MongoClient } = require('mongodb');
 let file = null;
 let users = null;
 
-const checkfile = () => {
-    try {
-        if (fs.existsSync("./data/users.json",'{"users":[]}')) {
-            let data = fs.readFileSync("./data/users.json").toString()
-            users = strObj(data)
-            console.log(users)
-        }else {
-            fs.writeFileSync("./data/users.json",'{"users":[]}')
-            let data = fs.readFileSync("./data/users.json").toString()
-            users = strObj(data)
-            console.log(users)
-        }
-    } catch(err) {
-        console.error(err)
-    }
-}
+let init = false;
+
+const uri = config.mongouri
+const client = new MongoClient(uri)
+
 
 const save = () => {
     fs.writeFileSync("./data/users.json",objStr(users))
 }
 
-exports.initusers = () => checkfile()
+exports.initusers = () => {
+    client.connect();
+    const database = client.db('test');
+    users = database.collection("user")
 
-exports.newuser = (username,password) => {
-    if (checkUsername(username)){
+    init = true;
+}
+
+
+exports.newuser = async(username,password) => {
+    if (!init) return
+    if (await checkUsername(username)){
         return false
     }
     else{
-        users.users.push({username:username,password:password})
-        save()
+        const result = users.insertOne({username:username,password:password})
     }
     return true
 }
 
-const checkUsername = (username) => {
+const checkUsername = async (username) => {
+    if (!init) return
+
     let returndata = false;
-    users.users.forEach((user)=>{
-        if (user.username == username) {
-            returndata = true
-        }
-    })
+
+    const query = { username: username };
+    const user = await users.findOne(query);
+
+    if (!user == null) {
+        returndata = true
+    }
     if (!returndata){
         if (username in config.unavalibleusernames){
             returndata = true;
@@ -53,13 +54,15 @@ const checkUsername = (username) => {
     return returndata
 }
 
-exports.getuser = (username,password) => {
+exports.getuser = async(username,password) => {
+    if (!init) return
     let returndata = false;
-    users.users.forEach(element => {
-        if (element.username == username && element.password == password) {
-            returndata = true
-        }
-    });
+
+    const query = { username: username };
+    const userdata = await users.findOne(query);
+    if (userdata.username == username && userdata.password == password) {
+        returndata = true
+    }
     
     return returndata
     
