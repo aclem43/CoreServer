@@ -3,7 +3,15 @@ const {getuser,initusers, newuser} = require('./modules/user')
 const config = require("./config.json")
 const { messages } = require('./modules/servermessages')
 const fastify = require('fastify')()
-fastify.register(require('fastify-websocket'))
+
+if (config.wss){
+  fastify.register(require('fastify-websocket'),{
+    cert: readFileSync(config.wssconfig.cert),
+    key: readFileSync(config.wssconfig.key)
+  })
+}else {
+  fastify.register(require('fastify-websocket'))
+}
 
 const sendall = (data) => {
   fastify.websocketServer.clients.forEach(function each(client) {
