@@ -17,7 +17,7 @@ const save = () => {
 
 exports.initusers = () => {
     client.connect();
-    const database = client.db('test');
+    const database = client.db(config.mongoconfig.database);
     users = database.collection("user")
 
     init = true;

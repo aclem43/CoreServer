@@ -8,6 +8,9 @@
         "key":"path"
     },
     "mongouri":"mongodb://indrocraft.hopto.org:27017/",
+    "mongoconfig":{
+        "database":"deploy"
+    },
     "unavalibleusernames":[
         "dev",
         "server",
