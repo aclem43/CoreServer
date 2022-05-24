@@ -34,7 +34,7 @@ fastify.get('/', { websocket: true },async(connection /* SocketStream */, req /*
     const data = strObj(message.toString())
     switch (data.type) {
       case eventTypes.CONNECTION:
-        connection.socket.send(objStr({type:eventTypes.CONNECTION,id:lastuserid+1}))
+        connection.socket.send(objStr({type:eventTypes.CONNECTION,id:lastuserid+1,version:config.version}))
         lastuserid++;
         
         break

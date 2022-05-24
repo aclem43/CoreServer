@@ -2,7 +2,7 @@
     "type":["connection","message","login","changegroup"],
     "connection":{
         "client":{"type":"connection"},
-        "server":{"type":"connection","id":"int"}
+        "server":{"type":"connection","id":"int","version":"str"}
     },
     "login":{
         "client":{"type":"login","username":"str","password":"str","id":"int"},
