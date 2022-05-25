@@ -13,7 +13,11 @@
         "server":{"type":"message","msgid":"int","message":"str","senttime":"timemilli","groupid":"int","senderusername":"str"}
     },
     "changegroup":{
-        "client":{"id":"int","type":"changegroup","groupid":"int"},
+        "client":{"id":"int","type":"changegroup","groupid":"str","oldgroupid":"str","username":"str"},
         "server":{"type":"changegroup","return":"bool","groupid":"groupid"}
+    },
+
+    "group":{
+        "server":{"groups":[{"id":"int","users":["str"]}]}
     }
 }   

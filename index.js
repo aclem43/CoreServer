@@ -2,6 +2,7 @@ const {objStr,strObj,eventTypes} = require('./modules/utils')
 const {getuser,initusers, newuser} = require('./modules/user')
 const config = require("./config.json")
 const { messages } = require('./modules/servermessages')
+const { changeGroup, initGroups, addUser, updateGroups } = require('./modules/group')
 const fastify = require('fastify')()
 
 if (config.wss){
@@ -25,6 +26,7 @@ const sendall = (data) => {
 let lastuserid = 0;
 let lastmsgid = 0
 
+initGroups(sendall)
 initusers()
 
 fastify.get('/', { websocket: true },async(connection /* SocketStream */, req /* FastifyRequest */) => {
@@ -44,7 +46,9 @@ fastify.get('/', { websocket: true },async(connection /* SocketStream */, req /*
           lastmsgid++;
           connection.socket.send(objStr({type:eventTypes.LOGIN,return:true}))
           lastmsgid++;
+          addUser("0000",data.username)
           messages.join(fastify.websocketServer,data.username,lastmsgid)
+          sendall(updateGroups())
         }else {
           connection.socket.send(objStr({type:eventTypes.LOGIN,return:false}))
         }
@@ -54,7 +58,9 @@ fastify.get('/', { websocket: true },async(connection /* SocketStream */, req /*
           lastmsgid++;
           connection.socket.send(objStr({type:eventTypes.LOGIN,return:true}))
           lastmsgid++;
-          messages.join(fastify.websocketServer,data.username,lastmsgid)        
+          addUser("0000",data.username)     
+          messages.join(fastify.websocketServer,data.username,lastmsgid)  
+          sendall(updateGroups())
         }
         else{
           connection.socket.send(objStr({type:eventTypes.LOGIN,return:false}))
@@ -73,6 +79,7 @@ fastify.get('/', { websocket: true },async(connection /* SocketStream */, req /*
           )
         break;
       case eventTypes.CHANGEGROUP:
+        changeGroup(data.oldgroupid,data.groupid,data.username)
         connection.socket.send(objStr({ 
           type:eventTypes.CHANGEGROUP,
           return:true,
@@ -88,6 +95,7 @@ fastify.get('/', { websocket: true },async(connection /* SocketStream */, req /*
             senttime:Date.now(),
             groupid:data.groupid,
         })
+        sendall(updateGroups())
 
         
         break

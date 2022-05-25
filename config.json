@@ -1,15 +1,15 @@
 {
     "port":42069,
     "host":"0.0.0.0",
-    "version":"0.4.1",
+    "version":"0.4.3",
     "wss":false,
     "wssconfig": {
         "cert":"path",
         "key":"path"
     },
-    "mongouri":"mongodb://indrocraft.hopto.org:27017/",
+    "mongouri":"mongodb://localhost:27017/",
     "mongoconfig":{
-        "database":"deploy"
+        "database":"test"
     },
     "unavalibleusernames":[
         "dev",
