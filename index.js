@@ -54,7 +54,7 @@ fastify.get('/', { websocket: true },async(connection /* SocketStream */, req /*
         }
         break
       case eventTypes.REGISTER:
-        if (newuser(data.username,data.password)){
+        if (await newuser(data.username,data.password)){
           lastmsgid++;
           connection.socket.send(objStr({type:eventTypes.LOGIN,return:true}))
           lastmsgid++;

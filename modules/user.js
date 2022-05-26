@@ -26,7 +26,8 @@ exports.initusers = () => {
 
 exports.newuser = async(username,password) => {
     if (!init) return
-    if (await checkUsername(username)){
+    const validity  = await checkUsername(username)
+    if (validity){
         return false
     }
     else{
@@ -43,7 +44,7 @@ const checkUsername = async (username) => {
     const query = { username: username };
     const user = await users.findOne(query);
 
-    if (!user == null) {
+    if (user.username == username ) {
         returndata = true
     }
     if (!returndata){

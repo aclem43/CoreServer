@@ -1,7 +1,7 @@
 {
     "port":42069,
     "host":"0.0.0.0",
-    "version":"0.4.3",
+    "version":"0.4.4",
     "wss":false,
     "wssconfig": {
         "cert":"path",
