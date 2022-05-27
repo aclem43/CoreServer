@@ -28,24 +28,34 @@ exports.getGroupById = (id) => {
 }
 
 
-exports.addUser = (groupid,username) =>{
+exports.addUser = (groupid,username,id) =>{
   this.getGroupById(groupid)
   groups.forEach(group => {
     if (group.id == groupid){
-        group.members.push(username)
+        group.members.push({id:id,user:username})
     }
   })
 }
 
-const removeUser = (groupid,username) => {
+exports.removeUser = (groupid,username,id) => {
   groups.forEach(group => {
     if (group.id == groupid){
-      
-      const index = group.members.indexOf(username);
-      if (index > -1) {
-        group.members.splice(index, 1); // 2nd parameter means remove one item only
-      }
+      group.members.forEach((member,index)=> {
+        if (member.id == id){
+          group.members.splice(index, 1);
+        }
+      })
     }
+  })
+}
+
+exports.removeUserById = (id) => {
+  groups.forEach((group)=>{
+    group.members.forEach((member,index)=>{
+       if (member.id == id) {
+        group.members.splice(index, 1);
+       }
+    })
   })
 }
 
@@ -54,8 +64,8 @@ exports.updateGroups = () => {
 }
   
 
-exports.changeGroup = (curentGroup,newGroup,username) => {
-  removeUser(curentGroup,username)
+exports.changeGroup = (curentGroup,newGroup,username,id) => {
+  this.removeUser(curentGroup,username,id)
   this.getGroupById(newGroup)
-  this.addUser(newGroup,username)
+  this.addUser(newGroup,username,id)
 }

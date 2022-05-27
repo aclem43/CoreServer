@@ -2,7 +2,7 @@ const {objStr,strObj,eventTypes} = require('./modules/utils')
 const {getuser,initusers, newuser} = require('./modules/user')
 const config = require("./config.json")
 const { messages } = require('./modules/servermessages')
-const { changeGroup, initGroups, addUser, updateGroups } = require('./modules/group')
+const { changeGroup, initGroups, addUser, updateGroups, removeUser, removeUserById } = require('./modules/group')
 const fastify = require('fastify')()
 
 if (config.wss){
@@ -30,14 +30,16 @@ initGroups(sendall)
 initusers()
 
 fastify.get('/', { websocket: true },async(connection /* SocketStream */, req /* FastifyRequest */) => {
+  connection.id = lastuserid
+  lastuserid++;
   connection.socket.on('message', async(message) => {
     //  message.toString() === 'hi from client'
  
     const data = strObj(message.toString())
     switch (data.type) {
       case eventTypes.CONNECTION:
-        connection.socket.send(objStr({type:eventTypes.CONNECTION,id:lastuserid+1,version:config.version}))
-        lastuserid++;
+        connection.socket.send(objStr({type:eventTypes.CONNECTION,id:connection.id,version:config.version}))
+
         
         break
       case eventTypes.LOGIN:
@@ -46,7 +48,7 @@ fastify.get('/', { websocket: true },async(connection /* SocketStream */, req /*
           lastmsgid++;
           connection.socket.send(objStr({type:eventTypes.LOGIN,return:true}))
           lastmsgid++;
-          addUser("0000",data.username)
+          addUser("0000",data.username,connection.id)
           messages.join(fastify.websocketServer,data.username,lastmsgid)
           sendall(updateGroups())
         }else {
@@ -58,7 +60,7 @@ fastify.get('/', { websocket: true },async(connection /* SocketStream */, req /*
           lastmsgid++;
           connection.socket.send(objStr({type:eventTypes.LOGIN,return:true}))
           lastmsgid++;
-          addUser("0000",data.username)     
+          addUser("0000",data.username,connection.id)  
           messages.join(fastify.websocketServer,data.username,lastmsgid)  
           sendall(updateGroups())
         }
@@ -79,7 +81,7 @@ fastify.get('/', { websocket: true },async(connection /* SocketStream */, req /*
           )
         break;
       case eventTypes.CHANGEGROUP:
-        changeGroup(data.oldgroupid,data.groupid,data.username)
+        changeGroup(data.oldgroupid,data.groupid,data.username,connection.id)
         connection.socket.send(objStr({ 
           type:eventTypes.CHANGEGROUP,
           return:true,
@@ -102,6 +104,11 @@ fastify.get('/', { websocket: true },async(connection /* SocketStream */, req /*
       default:
         break
     }
+
+    connection.socket.on('close', () => {
+      removeUserById(connection.id)
+      
+  });
     
   })
   //connection.socket.on("connection",(event) => {
