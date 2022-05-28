@@ -55,13 +55,14 @@ const checkUsername = async (username) => {
     return returndata
 }
 
-exports.getuser = async(username,password) => {
+exports.getuser = async(usrnm,password) => {
     if (!init) return
     let returndata = false;
 
-    const query = { username: username };
-    const userdata = await users.findOne(query);
-    if (userdata.username == username && userdata.password == password) {
+    const query = { username: usrnm };
+    const userdata = await users.findOne(query).catch((reason)=> console.log(reason));
+    if (userdata == null) returndata = false;
+    else if (userdata.username == usrnm && userdata.password == password) {
         returndata = true
     }
     

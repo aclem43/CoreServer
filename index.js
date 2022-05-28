@@ -4,11 +4,12 @@ const config = require("./config.json")
 const { messages } = require('./modules/servermessages')
 const { changeGroup, initGroups, addUser, updateGroups, removeUser, removeUserById } = require('./modules/group')
 const fastify = require('fastify')()
+const fs = require('fs')
 
 if (config.wss){
   fastify.register(require('fastify-websocket'),{
-    cert: readFileSync(config.wssconfig.cert),
-    key: readFileSync(config.wssconfig.key)
+    cert: fs.readFileSync(config.wssconfig.cert),
+    key: fs.readFileSync(config.wssconfig.key)
   })
 }else {
   fastify.register(require('fastify-websocket'))
