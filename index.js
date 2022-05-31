@@ -108,6 +108,7 @@ fastify.get('/', { websocket: true },async(connection /* SocketStream */, req /*
 
     connection.socket.on('close', () => {
       removeUserById(connection.id)
+      sendall(updateGroups())
       
   });
     
